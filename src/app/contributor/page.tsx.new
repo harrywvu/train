@@ -1,0 +1,221 @@
+"use client";
+import React, { useState } from "react";
+import { Upload, Shield, Database, Globe } from "lucide-react";
+import { Card, CardHeader, CardContent } from "../../components/ui/card";
+import AuditModal from "../../components/ui/audit-modal";
+import { motion } from "framer-motion";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
+
+interface Dataset {
+  name: string;
+  origin: string;
+  contributorId: string;
+  uploadTime: string;
+  hash: string;
+  aiReport: {
+    completeness: number;
+    biasFlag: boolean;
+    anomalyNotes: string;
+    reportHash: string;
+  };
+  blockchain: {
+    entryHash: string;
+    timestamp: string;
+  };
+  shared: boolean;
+}
+
+const initialDataset: Dataset = {
+  name: "ASEAN Trade Data 2025",
+  origin: "ASEAN",
+  contributorId: "user_12345",
+  uploadTime: "2025-09-28 10:15:00",
+  hash: "0xA1B2C3D4E5F6G7H8I9J0",
+  aiReport: {
+    completeness: 98,
+    biasFlag: false,
+    anomalyNotes: "No major anomalies detected.",
+    reportHash: "0xRPT1234567890"
+  },
+  blockchain: {
+    entryHash: "0xBC1234567890",
+    timestamp: "2025-09-28 10:15:01"
+  },
+  shared: false
+};
+
+export default function Contributor() {
+  const [datasets, setDatasets] = useState<Dataset[]>([initialDataset]);
+  const [showAudit, setShowAudit] = useState(false);
+  const [auditDataset, setAuditDataset] = useState<Dataset | null>(null);
+
+  function handleUpload() {
+    const newDataset: Dataset = {
+      name: "China Export Stats Q3",
+      origin: "China",
+      contributorId: "user_67890",
+      uploadTime: new Date().toISOString().slice(0, 19).replace("T", " "),
+      hash: "0x" + Math.random().toString(16).slice(2, 18).toUpperCase(),
+      aiReport: {
+        completeness: Math.floor(Math.random() * 20) + 80,
+        biasFlag: Math.random() > 0.5,
+        anomalyNotes: Math.random() > 0.7 ? "Potential anomaly detected." : "No major anomalies detected.",
+        reportHash: "0xRPT" + Math.random().toString(16).slice(2, 12).toUpperCase()
+      },
+      blockchain: {
+        entryHash: "0xBC" + Math.random().toString(16).slice(2, 12).toUpperCase(),
+        timestamp: new Date().toISOString().slice(0, 19).replace("T", " ")
+      },
+      shared: false
+    };
+    setDatasets([...datasets, newDataset]);
+  }
+
+  function handleShare(idx: number) {
+    const updated = [...datasets];
+    updated[idx].shared = true;
+    setDatasets(updated);
+  }
+
+  function handleAudit(dataset: Dataset) {
+    setAuditDataset(dataset);
+    setShowAudit(true);
+  }
+
+  return (
+    <div className="p-8">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">Contributor Dashboard</h1>
+        <button
+          type="button"
+          className="flex items-center gap-2 px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700 shadow"
+          onClick={handleUpload}
+        >
+          <Upload size={20} /> Upload Dataset
+        </button>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-visible relative">
+        {datasets.map((mockDataset, idx) => (
+          <div key={mockDataset.hash + "-container"} className="space-y-6">
+            <motion.div
+              whileHover={{ scale: 1.04, boxShadow: "0 8px 32px rgba(34,197,94,0.15)" }}
+              className="h-full z-10"
+              style={{overflow: 'visible', position: 'relative'}}
+            >
+              <Card className="shadow-lg rounded-xl h-full transition-all overflow-visible">
+                <CardHeader className="flex gap-2 items-center">
+                  <Database className="text-green-500" size={28} />
+                  <span className="font-semibold">Dataset Summary</span>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-sm space-y-1">
+                    <div><b>Name:</b> {mockDataset.name}</div>
+                    <div><b>Origin:</b> <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded ${mockDataset.origin === "ASEAN" ? "bg-blue-100 text-blue-800" : "bg-red-100 text-red-800"}`}><Globe size={14} /> {mockDataset.origin}</span></div>
+                    <div><b>Contributor ID:</b> {mockDataset.contributorId}</div>
+                    <div><b>Upload Time:</b> {mockDataset.uploadTime}</div>
+                    <div><b>Dataset Hash:</b> <span className="font-mono text-xs">{mockDataset.hash}</span></div>
+                    <button
+                      type="button"
+                      className="mt-2 text-xs px-2 py-1 rounded bg-blue-50 hover:bg-blue-200 text-blue-700"
+                      onClick={() => handleShare(idx)}
+                    >Share Cross-Border</button>
+                    {mockDataset.shared && (
+                      <motion.div
+                        initial={{ opacity: 0, x: 0 }}
+                        animate={{ opacity: 1, x: 40 }}
+                        exit={{ opacity: 0 }}
+                        className="mt-2 flex items-center gap-2"
+                      >
+                        <Globe className="text-blue-500" />
+                        <span className="text-xs font-bold">Shared to China</span>
+                        <svg width="60" height="20"><line x1="0" y1="10" x2="60" y2="10" stroke="#22c55e" strokeWidth="3" markerEnd="url(#arrowhead)" /><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#22c55e" /></marker></svg>
+                      </motion.div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              whileHover={{ scale: 1.04, boxShadow: "0 8px 32px rgba(34,197,94,0.15)" }}
+              className="h-full z-10"
+              style={{overflow: 'visible', position: 'relative'}}
+            >
+              <Card className="shadow-lg rounded-xl h-full transition-all overflow-visible">
+                <CardHeader className="flex gap-2 items-center">
+                  <Shield className="text-purple-500" size={28} />
+                  <span className="font-semibold">AI Quality Report</span>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="text-sm font-semibold mb-2">AI Analysis</div>
+                    <div>
+                      <ResponsiveContainer width="100%" height={60}>
+                        <BarChart
+                          data={[
+                            { name: "Completeness", value: mockDataset.aiReport.completeness },
+                            { name: "Bias", value: mockDataset.aiReport.biasFlag ? 40 : 10 },
+                            { name: "Anomaly", value: mockDataset.aiReport.anomalyNotes.includes("anomaly") ? 40 : 5 }
+                          ]}
+                          layout="vertical"
+                          margin={{ left: 20, right: 20 }}
+                        >
+                          <XAxis type="number" hide domain={[0, 100]} />
+                          <YAxis type="category" dataKey="name" width={90} />
+                          <Tooltip />
+                          <Bar dataKey="value">
+                            <Cell fill={mockDataset.aiReport.completeness > 90 ? "#22c55e" : mockDataset.aiReport.completeness > 70 ? "#eab308" : "#ef4444"} />
+                            <Cell fill={!mockDataset.aiReport.biasFlag ? "#22c55e" : "#eab308"} />
+                            <Cell fill={mockDataset.aiReport.anomalyNotes.includes("anomaly") ? "#ef4444" : "#22c55e"} />
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div className="flex gap-2 text-xs">
+                      <span className={`px-2 py-0.5 rounded ${mockDataset.aiReport.completeness > 90 ? 'bg-green-100 text-green-800' : mockDataset.aiReport.completeness > 70 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`}>
+                        Completeness: {mockDataset.aiReport.completeness}%
+                      </span>
+                      <span className={`px-2 py-0.5 rounded ${!mockDataset.aiReport.biasFlag ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                        Bias: {mockDataset.aiReport.biasFlag ? 'Flagged' : 'Low'}
+                      </span>
+                      <span className={`px-2 py-0.5 rounded ${mockDataset.aiReport.anomalyNotes.includes("anomaly") ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
+                        Anomalies: {mockDataset.aiReport.anomalyNotes.includes("anomaly") ? 1 : 0}
+                      </span>
+                    </div>
+                    <div className="text-xs text-gray-500">Report Hash: <span className="font-mono">{mockDataset.aiReport.reportHash}</span></div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              whileHover={{ scale: 1.04, boxShadow: "0 8px 32px rgba(34,197,94,0.15)" }}
+              className="h-full z-10"
+              style={{overflow: 'visible', position: 'relative'}}
+            >
+              <Card className="shadow-lg rounded-xl h-full transition-all overflow-visible">
+                <CardHeader className="flex gap-2 items-center">
+                  <Database className="text-yellow-500" size={28} />
+                  <span className="font-semibold">Blockchain Entry</span>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-sm space-y-1">
+                    <div><b>Entry Hash:</b> <span className="font-mono text-xs">{mockDataset.blockchain.entryHash}</span></div>
+                    <div><b>Timestamp:</b> {mockDataset.blockchain.timestamp}</div>
+                    <div><b>Contributor ID:</b> {mockDataset.contributorId}</div>
+                    <button
+                      type="button"
+                      className="mt-2 text-xs px-2 py-1 rounded bg-yellow-50 hover:bg-yellow-200 text-yellow-700"
+                      onClick={() => handleAudit(mockDataset)}
+                    >View Audit</button>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+        ))}
+      </div>
+      <AuditModal open={showAudit} onClose={() => setShowAudit(false)} dataset={auditDataset} />
+    </div>
+  );
+}

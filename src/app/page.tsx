@@ -1,14 +1,24 @@
-import { Shield, Database, Globe, Upload } from "lucide-react";
+import { Database, Globe, Upload } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
+
+import DarkModeToggle from "../components/ui/darkmode-toggle";
 import { Card, CardHeader, CardContent } from "../components/ui/card";
 
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-zinc-100 dark:from-zinc-900 dark:to-zinc-800 p-6">
+      <DarkModeToggle />
       <Card className="w-full max-w-xl mx-auto shadow-xl rounded-2xl mb-8">
         <CardHeader className="flex flex-col items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Shield className="text-blue-600" size={32} />
+          <div className="flex items-center gap-3">
+            <Image 
+              src="/logo/new logo png.png" 
+              alt="TRAIN Logo" 
+              width={48} 
+              height={48}
+              className="object-contain"
+            />
             <span className="text-3xl font-extrabold tracking-tight">TRAIN</span>
           </div>
           <span className="text-lg text-zinc-700 dark:text-zinc-300 text-center">Trusted AI + Infrastructure · Auditable Datasets for Cross-Border Trust.</span>
